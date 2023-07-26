@@ -109,7 +109,7 @@
         <div class="edit-controls">
             <div>
                 <button onclick="addNote()">編輯模式</button>
-                <!-- 新增提交按鈕 -->
+                <!-- 修改提交按鈕的 onclick 事件 -->
                 <button onclick="submitNote()">提交筆記</button>
                 <button onclick="saveNotes()">保存筆記</button>
             </div>
@@ -118,12 +118,15 @@
                 <button onclick="returnToLogin()">返回登陸</button>
             </div>
         </div>
+        <!-- 新增筆記列表容器 -->
+        <div id="notesList"></div>
     </div>
 
     <script>
         let isLoggedIn = false;
         let isGuestLogin = false;
         let editMode = false;
+        let notes = [];
 
         // 登入函數，用於驗證帳號密碼
         function login() {
@@ -194,8 +197,6 @@
             document.getElementById('noteImage').disabled = true;
         }
 
-        // 省略筆記相關程式碼，與之前相同
-
         // 在 addNote() 函數中新增以下程式碼，判斷是否允許編輯，若不允許則不新增筆記
         function addNote() {
             if (editMode) {
@@ -205,7 +206,6 @@
             }
         }
 
-        // 在 editNote() 函數中新增以下程式碼，判斷是否允許編輯，若不允許則不進行編輯
         // 編輯筆記函數
         function editNote(index) {
             if (isLoggedIn) {
@@ -296,7 +296,7 @@
             displayNotes();
         }
 
-                // 顯示筆記列表
+        // 顯示筆記列表
         function displayNotes() {
             const notesList = document.getElementById('notesList');
             notesList.innerHTML = '';
