@@ -325,7 +325,7 @@
 
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = '刪除';
-                deleteButton.onclick = () => deleteNote();
+                deleteButton.onclick = () => deleteNote(index);
                 noteElement.appendChild(deleteButton);
 
                 notesList.appendChild(noteElement);
