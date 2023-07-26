@@ -227,36 +227,6 @@
             }
         }
 
-        // 提交筆記函數
-        function submitNote() {
-            if (isGuestLogin) {
-                alert('訪客登陸無法進行編輯！');
-                return;
-            }
-
-            const noteAuthor = document.getElementById('noteAuthor').value;
-            const noteTitle = document.getElementById('noteTitle').value;
-            const noteContent = document.getElementById('noteContent').value;
-
-            // 確保標題和內容都填寫了才提交
-            if (!noteTitle || !noteContent) {
-                alert('請填寫標題和內容再提交！');
-                return;
-            }
-
-            // 在這裡處理提交筆記的邏輯，例如將筆記存儲到後端或本地存儲等
-            // 範例中將筆記存儲到 notes 陣列中
-            notes.push({ author: noteAuthor, title: noteTitle, content: noteContent });
-
-            // 清空輸入欄位
-            document.getElementById('noteAuthor').value = '';
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
-
-            // 顯示筆記列表
-            displayNotes();
-        }
-
         // 在 deleteNote() 函數中修正刪除按鈕的 onclick 事件
         function deleteNote(index) {
             if (isLoggedIn) {
