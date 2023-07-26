@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>筆記本</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .note {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .note h3 {
+            margin-top: 0;
+        }
+
+        .note p {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>我的筆記本</h2>
+        <!-- 新增紀錄者欄位 -->
+        <input type="text" id="noteAuthor" placeholder="紀錄者">
+        <input type="text" id="noteTitle" placeholder="標題">
+        <textarea id="noteContent" placeholder="在這裡輸入筆記內容"></textarea>
+        <!-- 新增上傳圖片的輸入欄位 -->
+        <input type="file" id="noteImage">
+        <button onclick="addNote()">新增筆記</button>
+        <button onclick="saveNotes()">保存筆記</button>
+        <div id="notesList"></div>
+    </div>
+
+    <script>
+        let notes = [];
+
+        window.onload = () => {
+            const storedNotes = JSON.parse(localStorage.getItem('notes') || '[]');
+            notes = storedNotes;
+            displayNotes();
+        };
+
+        function addNote() {
+            const noteAuthor = document.getElementById('noteAuthor').value;
+            const noteTitle = document.getElementById('noteTitle').value;
+            const noteContent = document.getElementById('noteContent').value;
+            const noteImageInput = document.getElementById('noteImage');
+            const noteImage = noteImageInput.files[0];
+
+            notes.push({ author: noteAuthor, title: noteTitle, content: noteContent, image: noteImage });
+
+            displayNotes();
+
+            document.getElementById('noteAuthor').value = '';
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            noteImageInput.value = '';
+        }
+
+        function displayNotes() {
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+
+            notes.forEach((note, index) => {
+                const noteElement = document.createElement('div');
+                noteElement.classList.add('note');
+
+                const titleElement = document.createElement('h3');
+                titleElement.textContent = note.title;
+                noteElement.appendChild(titleElement);
+
+                const contentElement = document.createElement('p');
+                contentElement.textContent = note.content;
+                noteElement.appendChild(contentElement);
+
+                const authorElement = document.createElement('p');
+                authorElement.textContent = `紀錄者：${note.author}`;
+                noteElement.appendChild(authorElement);
+
+                if (note.image) {
+                    const imageElement = document.createElement('img');
+                    imageElement.src = URL.createObjectURL(note.image);
+                    noteElement.appendChild(imageElement);
+                }
+
+                const editButton = document.createElement('button');
+                editButton.textContent = '編輯';
+                editButton.onclick = () => editNote(index);
+                noteElement.appendChild(editButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '刪除';
+                deleteButton.onclick = () => confirmDelete(index);
+                noteElement.appendChild(deleteButton);
+
+                notesList.appendChild(noteElement);
+            });
+        }
+
+        function saveNotes() {
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        function editNote(index) {
+            const note = notes[index];
+            document.getElementById('noteAuthor').value = note.author;
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteContent').value = note.content;
+            notes.splice(index, 1);
+            displayNotes();
+        }
+
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            displayNotes();
+        }
+
+        function confirmDelete(index) {
+            const deleteConfirm = confirm('是否確認刪除？');
+            if (deleteConfirm) {
+                deleteNote(index);
+            }
+        }
+    </script>
+</body>
+</html>
