@@ -288,15 +288,31 @@
             const noteImage = noteImageInput.files[0]; // Get the selected file
 
             if (!noteAuthor || !noteTitle || !noteContent) {
-                alert('請填寫完整筆記資訊並選擇圖片！');
+                alert('請填寫完整筆記資訊！');
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                // 在這裡處理提交筆記的邏輯，例如將筆記存儲到後端或本地存儲等
-                // 範例中將筆記存儲到 notes 陣列中
-                notes.push({ author: noteAuthor, title: noteTitle, content: noteContent, image: e.target.result });
+            // 檢查是否有選擇圖片
+            if (noteImage) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    // 在這裡處理提交筆記的邏輯，例如將筆記存儲到後端或本地存儲等
+                    // 範例中將筆記存儲到 notes 陣列中
+                    notes.push({ author: noteAuthor, title: noteTitle, content: noteContent, image: e.target.result });
+
+                    // 清空輸入欄位
+                    document.getElementById('noteAuthor').value = '';
+                    document.getElementById('noteTitle').value = '';
+                    document.getElementById('noteContent').value = '';
+                    document.getElementById('noteImage').value = '';
+
+                    // 顯示筆記列表
+                    displayNotes();
+                };
+                reader.readAsDataURL(noteImage); // Read the selected file as a Data URL
+            } else {
+                // 沒有選擇圖片，筆記中的image屬性設為空值
+                notes.push({ author: noteAuthor, title: noteTitle, content: noteContent, image: '' });
 
                 // 清空輸入欄位
                 document.getElementById('noteAuthor').value = '';
@@ -306,8 +322,7 @@
 
                 // 顯示筆記列表
                 displayNotes();
-            };
-            reader.readAsDataURL(noteImage); // Read the selected file as a Data URL
+            }
         }
 
         // 顯示筆記列表
