@@ -69,12 +69,18 @@
             flex-direction: column;
             align-items: center;
         }
+
+        .edit-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <div class="login-container" id="loginContainer">
         <h2>登入</h2>
-        <input type="password" id="username" placeholder="帳號">
+        <input type="text" id="username" placeholder="帳號">
         <input type="password" id="password" placeholder="密碼">
         <p style="font-size: 5px;"></p>
         <button onclick="login()">登入</button>
@@ -83,7 +89,7 @@
         <p style="font-size: 10px; color: red;">* 訪客登陸無法進行編輯</p>
     </div>
 
-    <div class="container" style="display:none;">
+    <div class="container" id="notebookContainer" style="display:none;">
         <h2>游泳教練筆記本</h2>
         <!-- 新增紀錄者欄位 -->
         <input type="text" id="noteAuthor" placeholder="紀錄者">
@@ -91,22 +97,30 @@
         <textarea id="noteContent" placeholder="在這裡輸入筆記內容"></textarea>
         <!-- 新增上傳圖片的輸入欄位 -->
         <input type="file" id="noteImage">
-        <button onclick="addNote()">新增筆記</button>
-        <button onclick="saveNotes()">保存筆記</button>
-        <button onclick="returnToLogin()">返回登陸</button>
+        <div class="edit-controls">
+            <div>
+                <!-- 新增提交按鈕 -->
+                <button onclick="submitNote()">提交筆記</button>
+                <button onclick="saveNotes()">保存筆記</button>
+            </div>
+            <div>
+                <button onclick="returnToLogin()">返回登陸</button>
+            </div>
+        </div>
         <div id="notesList"></div>
     </div>
 
     <script>
         let isLoggedIn = false;
         let isGuestLogin = false;
+        let editMode = false;
 
         // 登入函數，用於驗證帳號密碼
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            if (username === 'ZJX' && password === '93966167') {
+            if (username === 'admin' && password === 'password') {
                 isLoggedIn = true;
                 isGuestLogin = false;
                 showNotebook();
@@ -122,78 +136,213 @@
             showNotebook();
         }
 
-        // 返回登陸函數，用於返回登陸畫面
-        function returnToLogin() {
-            isLoggedIn = false;
-            isGuestLogin = false;
-            hideNotebook();
-            showLogin();
-        }
-
         // 顯示筆記本
         function showNotebook() {
-            const loginContainer = document.querySelector('.login-container');
-            const notebookContainer = document.querySelector('.container');
+            const loginContainer = document.getElementById('loginContainer');
+            const notebookContainer = document.getElementById('notebookContainer');
 
             loginContainer.style.display = 'none';
             notebookContainer.style.display = 'block';
+
+            // 如果是訪客登陸，則禁用編輯功能
+            if (isGuestLogin) {
+                disableEditing();
+            }
         }
 
-        // 隱藏筆記本
-        function hideNotebook() {
-            const loginContainer = document.querySelector('.login-container');
-            const notebookContainer = document.querySelector('.container');
-
-            loginContainer.style.display = 'block';
-            notebookContainer.style.display = 'none';
+        // 啟用編輯功能
+        function enableEditing() {
+            document.getElementById('noteAuthor').disabled = false;
+            document.getElementById('noteTitle').disabled = false;
+            document.getElementById('noteContent').disabled = false;
+            document.getElementById('noteImage').disabled = false;
         }
 
-        // 顯示登陸畫面
-        function showLogin() {
-            const loginContainer = document.querySelector('.login-container');
-            const notebookContainer = document.querySelector('.container');
-
-            loginContainer.style.display = 'block';
-            notebookContainer.style.display = 'none';
+        // 禁用編輯功能
+        function disableEditing() {
+            document.getElementById('noteAuthor').disabled = true;
+            document.getElementById('noteTitle').disabled = true;
+            document.getElementById('noteContent').disabled = true;
+            document.getElementById('noteImage').disabled = true;
         }
 
-        // 定義筆記陣列等相關功能，與之前相同
+        // 省略筆記相關程式碼，與之前相同
 
-        // 在 addNote() 函數中新增以下程式碼，判斷是否登入或訪客登陸，若未登入則不新增筆記
+        // 在 addNote() 函數中新增以下程式碼，判斷是否允許編輯，若不允許則不新增筆記
         function addNote() {
-            if (isLoggedIn || isGuestLogin) {
+            if (editMode) {
                 // 筆記相關程式碼，與之前相同
             } else {
-                alert('您尚未登入，請先登入或使用訪客登陸！');
+                alert('您尚未進入編輯模式，請先切換為編輯模式！');
             }
         }
 
-        // 在 editNote() 函數中新增以下程式碼，判斷是否登入或訪客登陸，若未登入則不進行編輯
+        // 在 editNote() 函數中新增以下程式碼，判斷是否允許編輯，若不允許則不進行編輯
+        // 編輯筆記函數
         function editNote(index) {
             if (isLoggedIn || isGuestLogin) {
-                // 編輯筆記相關程式碼，與之前相同
+                // 從筆記陣列中取得要編輯的筆記
+                const note = notes[index];
+
+                // 將筆記內容設置到輸入欄中供編輯
+                document.getElementById('noteAuthor').value = note.author;
+                document.getElementById('noteTitle').value = note.title;
+                document.getElementById('noteContent').value = note.content;
+
+                // 刪除已存在的筆記
+                notes.splice(index, 1);
+
+                // 重新顯示筆記列表
+                displayNotes();
             } else {
                 alert('您尚未登入，請先登入或使用訪客登陸！');
             }
         }
 
-        // 在 deleteNote() 函數中新增以下程式碼，判斷是否登入或訪客登陸，若未登入則不進行刪除
+        // 提交筆記函數
+        function submitNote() {
+            if (isGuestLogin) {
+                alert('訪客登陸無法進行編輯！');
+                return;
+            }
+
+            const noteAuthor = document.getElementById('noteAuthor').value;
+            const noteTitle = document.getElementById('noteTitle').value;
+            const noteContent = document.getElementById('noteContent').value;
+
+            // 確保標題和內容都填寫了才提交
+            if (!noteTitle || !noteContent) {
+                alert('請填寫標題和內容再提交！');
+                return;
+            }
+
+            // 在這裡處理提交筆記的邏輯，例如將筆記存儲到後端或本地存儲等
+            // 範例中將筆記存儲到 notes 陣列中
+            notes.push({ author: noteAuthor, title: noteTitle, content: noteContent });
+
+            // 清空輸入欄位
+            document.getElementById('noteAuthor').value = '';
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+
+            // 顯示筆記列表
+            displayNotes();
+        }
+
+
+        // 在 deleteNote() 函數中修正刪除按鈕的 onclick 事件
         function deleteNote(index) {
             if (isLoggedIn || isGuestLogin) {
-                // 刪除筆記相關程式碼，與之前相同
+                // 從筆記陣列中刪除指定的筆記
+                notes.splice(index, 1);
+
+                // 重新儲存筆記到 localStorage
+                localStorage.setItem('notes', JSON.stringify(notes));
+
+                // 重新顯示筆記列表
+                displayNotes();
             } else {
                 alert('您尚未登入，請先登入或使用訪客登陸！');
             }
         }
 
-        // 在 saveNotes() 函數中新增以下程式碼，判斷是否登入或訪客登陸，若未登入則不保存筆記
+        // 在 saveNotes() 函數中新增以下程式碼，判斷是否允許編輯，若不允許則不保存筆記
         function saveNotes() {
-            if (isLoggedIn || isGuestLogin) {
+            if (editMode) {
                 // 保存筆記相關程式碼，與之前相同
             } else {
-                alert('您尚未登入，請先登入或使用訪客登陸！');
+                alert('您尚未進入編輯模式，請先切換為編輯模式！');
             }
         }
+
+        // 返回登陸畫面函數
+        function returnToLogin() {
+            isLoggedIn = false;
+            isGuestLogin = false;
+            editMode = false;
+
+            // 清空輸入欄位
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('noteAuthor').value = '';
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+
+            const loginContainer = document.getElementById('loginContainer');
+            const notebookContainer = document.getElementById('notebookContainer');
+
+            notebookContainer.style.display = 'none';
+            loginContainer.style.display = 'flex';
+        }
+
+        // 提交筆記函數
+        function submitNote() {
+            if (isGuestLogin) {
+                alert('訪客登陸無法進行編輯！');
+                return;
+            }
+
+            const noteAuthor = document.getElementById('noteAuthor').value;
+            const noteTitle = document.getElementById('noteTitle').value;
+            const noteContent = document.getElementById('noteContent').value;
+
+            // 在這裡處理提交筆記的邏輯，例如將筆記存儲到後端或本地存儲等
+            // 範例中將筆記存儲到 notes 陣列中
+            notes.push({ author: noteAuthor, title: noteTitle, content: noteContent });
+
+            // 清空輸入欄位
+            document.getElementById('noteAuthor').value = '';
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+
+            // 顯示筆記列表
+            displayNotes();
+        }
+
+                // 顯示筆記列表
+        function displayNotes() {
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+
+            // 顯示筆記列表中的筆記
+            notes.forEach((note, index) => {
+                const noteElement = document.createElement('div');
+                noteElement.classList.add('note');
+
+                const titleElement = document.createElement('h3');
+                titleElement.textContent = note.title;
+                noteElement.appendChild(titleElement);
+
+                const authorElement = document.createElement('p');
+                authorElement.textContent = '紀錄者：' + note.author;
+                noteElement.appendChild(authorElement);
+
+                const contentElement = document.createElement('p');
+                contentElement.textContent = note.content;
+                noteElement.appendChild(contentElement);
+
+                const editButton = document.createElement('button');
+                editButton.textContent = '編輯';
+                editButton.onclick = () => editNote(index);
+                noteElement.appendChild(editButton);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '刪除';
+                deleteButton.onclick = () => deleteNote();
+                noteElement.appendChild(deleteButton);
+
+                notesList.appendChild(noteElement);
+            });
+        }
+
+        // 加載頁面時讀取 localStorage 中的筆記內容
+        window.onload = () => {
+            const storedNotes = JSON.parse(localStorage.getItem('notes') || '[]');
+            notes = storedNotes;
+            displayNotes();
+        };
+
+
     </script>
 </body>
 </html>
