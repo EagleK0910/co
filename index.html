@@ -79,7 +79,7 @@
 </head>
 <body>
     <div class="login-container" id="loginContainer">
-        <h2>登入</h2>
+        <h2>筆記本登入系統</h2>
         <input type="password" id="username" placeholder="帳號">
         <input type="password" id="password" placeholder="密碼">
         <p style="font-size: 5px;"></p>
@@ -87,6 +87,15 @@
         <p style="font-size: 5px;"></p>
         <button onclick="loginAsGuest()">訪客登陸</button>
         <p style="font-size: 10px; color: red;">* 訪客登陸無法進行編輯</p>
+
+        <div class="footer-container">
+            <p style="font-size: 10px; color: red;">
+                <p>&emsp;</p>
+                <p>&emsp;</p>
+                <div id="result">The design produced by J.X.ZHANG
+                    <br>Version 1.1.2
+                </div></p>
+        </div>
     </div>
 
     <div class="container" id="notebookContainer" style="display:none;">
@@ -94,20 +103,21 @@
         <!-- 新增紀錄者欄位 -->
         <input type="text" id="noteAuthor" placeholder="紀錄者">
         <input type="text" id="noteTitle" placeholder="標題">
-        <textarea id="noteContent" placeholder="在這裡輸入筆記內容"></textarea>
+        <textarea id="noteContent" placeholder="筆記內容"></textarea>
         <!-- 新增上傳圖片的輸入欄位 -->
         <input type="file" id="noteImage">
         <div class="edit-controls">
             <div>
+                <button onclick="addNote()">編輯模式</button>
                 <!-- 新增提交按鈕 -->
                 <button onclick="submitNote()">提交筆記</button>
                 <button onclick="saveNotes()">保存筆記</button>
             </div>
             <div>
+                <button onclick="toggleEditMode()">模式選擇</button>
                 <button onclick="returnToLogin()">返回登陸</button>
             </div>
         </div>
-        <div id="notesList"></div>
     </div>
 
     <script>
@@ -150,6 +160,24 @@
             }
         }
 
+        // 切換編輯模式函數，用於切換允許或禁止編輯筆記
+        function toggleEditMode() {
+            if (isGuestLogin) {
+                alert('訪客登陸無法進行編輯！');
+                return;
+            }
+
+            editMode = !editMode;
+            const editButton = document.querySelector('.edit-controls button:nth-child(1)');
+            if (editMode) {
+                editButton.textContent = '編輯模式';
+                enableEditing();
+            } else {
+                editButton.textContent = '閱讀模式';
+                disableEditing();
+            }
+        }
+
         // 啟用編輯功能
         function enableEditing() {
             document.getElementById('noteAuthor').disabled = false;
@@ -180,7 +208,7 @@
         // 在 editNote() 函數中新增以下程式碼，判斷是否允許編輯，若不允許則不進行編輯
         // 編輯筆記函數
         function editNote(index) {
-            if (isLoggedIn || isGuestLogin) {
+            if (isLoggedIn) {
                 // 從筆記陣列中取得要編輯的筆記
                 const note = notes[index];
 
@@ -229,10 +257,9 @@
             displayNotes();
         }
 
-
         // 在 deleteNote() 函數中修正刪除按鈕的 onclick 事件
         function deleteNote(index) {
-            if (isLoggedIn || isGuestLogin) {
+            if (isLoggedIn) {
                 // 從筆記陣列中刪除指定的筆記
                 notes.splice(index, 1);
 
@@ -247,8 +274,8 @@
         }
 
         // 在 saveNotes() 函數中新增以下程式碼，判斷是否允許編輯，若不允許則不保存筆記
-        function saveNotes() {
-            if (editMode) {
+        function saveNotes(index) {
+            if (isLoggedIn) {
                 // 保存筆記相關程式碼，與之前相同
             } else {
                 alert('您尚未進入編輯模式，請先切換為編輯模式！');
