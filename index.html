@@ -216,6 +216,7 @@
                 document.getElementById('noteAuthor').value = note.author;
                 document.getElementById('noteTitle').value = note.title;
                 document.getElementById('noteContent').value = note.content;
+                document.getElementById('noteImage').value = note.noteImage;
 
                 // 刪除已存在的筆記
                 notes.splice(index, 1);
@@ -264,6 +265,7 @@
             document.getElementById('noteAuthor').value = '';
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteContent').value = '';
+            document.getElementById('noteImage').value = '';
 
             const loginContainer = document.getElementById('loginContainer');
             const notebookContainer = document.getElementById('notebookContainer');
@@ -282,18 +284,30 @@
             const noteAuthor = document.getElementById('noteAuthor').value;
             const noteTitle = document.getElementById('noteTitle').value;
             const noteContent = document.getElementById('noteContent').value;
+            const noteImageInput = document.getElementById('noteImage');
+            const noteImage = noteImageInput.files[0]; // Get the selected file
 
-            // 在這裡處理提交筆記的邏輯，例如將筆記存儲到後端或本地存儲等
-            // 範例中將筆記存儲到 notes 陣列中
-            notes.push({ author: noteAuthor, title: noteTitle, content: noteContent });
+            if (!noteAuthor || !noteTitle || !noteContent || !noteImage) {
+                alert('請填寫完整筆記資訊並選擇圖片！');
+                return;
+            }
 
-            // 清空輸入欄位
-            document.getElementById('noteAuthor').value = '';
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // 在這裡處理提交筆記的邏輯，例如將筆記存儲到後端或本地存儲等
+                // 範例中將筆記存儲到 notes 陣列中
+                notes.push({ author: noteAuthor, title: noteTitle, content: noteContent, image: e.target.result });
 
-            // 顯示筆記列表
-            displayNotes();
+                // 清空輸入欄位
+                document.getElementById('noteAuthor').value = '';
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteContent').value = '';
+                document.getElementById('noteImage').value = '';
+
+                // 顯示筆記列表
+                displayNotes();
+            };
+            reader.readAsDataURL(noteImage); // Read the selected file as a Data URL
         }
 
         // 顯示筆記列表
@@ -318,6 +332,10 @@
                 contentElement.textContent = note.content;
                 noteElement.appendChild(contentElement);
 
+                const noteImage = document.createElement('img');
+                noteImage.src = note.image;
+                noteElement.appendChild(noteImage);
+
                 const editButton = document.createElement('button');
                 editButton.textContent = '編輯';
                 editButton.onclick = () => editNote(index);
@@ -331,6 +349,7 @@
                 notesList.appendChild(noteElement);
             });
         }
+
 
         // 加載頁面時讀取 localStorage 中的筆記內容
         window.onload = () => {
